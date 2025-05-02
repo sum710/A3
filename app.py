@@ -139,9 +139,12 @@ if load_btn:
         if uploaded_file is not None:
             try:
                 df = pd.read_csv(uploaded_file)
-                st.session_state.df = df
-                st.success("Dataset loaded successfully from file!")
-                st.session_state.step = 1
+                if df.empty:
+                    st.error("Uploaded file is empty. Please upload a valid CSV file.")
+                else:
+                    st.session_state.df = df
+                    st.success("Dataset loaded successfully from file!")
+                    st.session_state.step = 1
             except Exception as e:
                 st.error(f"Error loading file: {e}")
         elif ticker:
@@ -157,7 +160,7 @@ if load_btn:
                 st.error(f"Error fetching data: {e}")
         else:
             st.warning("Please upload a dataset or enter a ticker.")
-    if st.session_state.df is not None:
+    if st.session_state.df is not None and not st.session_state.df.empty:
         st.dataframe(st.session_state.df.head())
         st.markdown(f"**Rows:** {st.session_state.df.shape[0]} | **Columns:** {st.session_state.df.shape[1]}")
         st.plotly_chart(px.histogram(st.session_state.df, x=st.session_state.df.columns[0]))
@@ -178,8 +181,8 @@ if example_btn:
         st.markdown(f"**Rows:** {st.session_state.df.shape[0]} | **Columns:** {st.session_state.df.shape[1]}")
         st.plotly_chart(px.histogram(st.session_state.df, x=st.session_state.df.columns[0]))
 
-# Only proceed if data is loaded
-if st.session_state.df is not None:
+# Only proceed if data is loaded and not empty
+if st.session_state.df is not None and not st.session_state.df.empty:
     # Step 2: Preprocessing
     st.header("Step 2: Preprocessing")
     preprocess_btn = st.button("Preprocess Data")
@@ -189,15 +192,18 @@ if st.session_state.df is not None:
             missing = df.isnull().sum().sum()
             st.info(f"Missing values in dataset: {missing}")
             df = df.dropna()
-            st.session_state.df = df
-            st.success("Missing values removed. Data cleaned.")
-            st.dataframe(df.head())
-            st.session_state.step = 2
-            corr = df.corr(numeric_only=True)
-            if corr.shape[0] > 1 and not corr.isnull().all().all():
-                st.plotly_chart(px.imshow(corr, text_auto=True, color_continuous_scale='blues', title="Correlation Heatmap"))
+            if df.empty:
+                st.error("All rows were dropped during preprocessing. Please check your data.")
             else:
-                st.info("Not enough numeric data for correlation heatmap.")
+                st.session_state.df = df
+                st.success("Missing values removed. Data cleaned.")
+                st.dataframe(df.head())
+                st.session_state.step = 2
+                corr = df.corr(numeric_only=True)
+                if corr.shape[0] > 1 and not corr.isnull().all().all():
+                    st.plotly_chart(px.imshow(corr, text_auto=True, color_continuous_scale='blues', title="Correlation Heatmap"))
+                else:
+                    st.info("Not enough numeric data for correlation heatmap.")
 
     # Step 3: Feature Engineering
     st.header("Step 3: Feature Engineering")
@@ -208,7 +214,6 @@ if st.session_state.df is not None:
         if not numeric_cols:
             st.error("No numeric columns found for feature selection.")
         else:
-            # Prefer 'Close' or 'C' as default target if present
             default_target = None
             note = ""
             if 'Close' in numeric_cols:
@@ -221,12 +226,17 @@ if st.session_state.df is not None:
             target = st.selectbox("Select target variable", numeric_cols, index=numeric_cols.index(default_target) if default_target else len(numeric_cols)-1)
             if note:
                 st.info(note)
-            st.session_state.features = features
-            st.session_state.target = target
-            st.info(f"Selected features: {features}")
-            st.info(f"Target variable: {target}")
-            st.success("Feature selection complete.")
-            st.session_state.step = 3
+            if not features:
+                st.error("Please select at least one feature.")
+            elif target in features:
+                st.error("Target variable cannot be one of the features. Please adjust your selection.")
+            else:
+                st.session_state.features = features
+                st.session_state.target = target
+                st.info(f"Selected features: {features}")
+                st.info(f"Target variable: {target}")
+                st.success("Feature selection complete.")
+                st.session_state.step = 3
 
     # Step 4: Train/Test Split
     st.header("Step 4: Train/Test Split")
@@ -237,76 +247,102 @@ if st.session_state.df is not None:
         target = st.session_state.target
         if not features or not target:
             st.error("Please select features and target variable first.")
+        elif target in features:
+            st.error("Target variable cannot be one of the features. Please adjust your selection.")
+        elif df.shape[0] < 2:
+            st.error("Not enough data to split. Need at least 2 rows.")
         else:
             X = df[features]
             y = df[target]
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            st.session_state.X_train = X_train
-            st.session_state.X_test = X_test
-            st.session_state.y_train = y_train
-            st.session_state.y_test = y_test
-            st.success("Data split into train and test sets.")
-            pie = go.Figure(data=[go.Pie(labels=['Train', 'Test'], values=[len(X_train), len(X_test)], hole=.3)])
-            st.plotly_chart(pie)
-            st.session_state.step = 4
+            try:
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+                if X_train.empty or X_test.empty:
+                    st.error("Train or test set is empty after split. Please check your data.")
+                else:
+                    st.session_state.X_train = X_train
+                    st.session_state.X_test = X_test
+                    st.session_state.y_train = y_train
+                    st.session_state.y_test = y_test
+                    st.success("Data split into train and test sets.")
+                    pie = go.Figure(data=[go.Pie(labels=['Train', 'Test'], values=[len(X_train), len(X_test)], hole=.3)])
+                    st.plotly_chart(pie)
+                    st.session_state.step = 4
+            except Exception as e:
+                st.error(f"Error during train/test split: {e}")
 
     # Step 5: Model Training
     st.header("Step 5: Model Training")
     model_type = st.selectbox("Choose ML Model", ["Linear Regression", "Logistic Regression", "K-Means Clustering"])
     train_btn = st.button("Train Model")
     if train_btn:
-        with st.spinner("Training model..."):
-            X_train = st.session_state.X_train
-            y_train = st.session_state.y_train
-            if model_type == "Linear Regression":
-                model = LinearRegression()
-                model.fit(X_train, y_train)
-                st.session_state.model = model
-                st.success("Linear Regression model trained.")
-            elif model_type == "Logistic Regression":
-                model = LogisticRegression(max_iter=1000)
-                model.fit(X_train, y_train)
-                st.session_state.model = model
-                st.success("Logistic Regression model trained.")
-            elif model_type == "K-Means Clustering":
-                model = KMeans(n_clusters=3)
-                model.fit(X_train)
-                st.session_state.model = model
-                st.success("K-Means clustering model trained.")
-            st.session_state.step = 5
+        if st.session_state.X_train is None or st.session_state.y_train is None:
+            st.error("Please split the data before training.")
+        else:
+            with st.spinner("Training model..."):
+                X_train = st.session_state.X_train
+                y_train = st.session_state.y_train
+                if X_train.empty or y_train.empty:
+                    st.error("Training data is empty. Please check your data and split again.")
+                elif model_type == "Linear Regression":
+                    model = LinearRegression()
+                    model.fit(X_train, y_train)
+                    st.session_state.model = model
+                    st.success("Linear Regression model trained.")
+                elif model_type == "Logistic Regression":
+                    # Check if target is categorical
+                    if y_train.nunique() > 10 or y_train.dtype.kind == 'f':
+                        st.error("Logistic Regression requires a categorical target variable (e.g., 0/1 or classes). Please select a suitable target.")
+                    else:
+                        model = LogisticRegression(max_iter=1000)
+                        model.fit(X_train, y_train)
+                        st.session_state.model = model
+                        st.success("Logistic Regression model trained.")
+                elif model_type == "K-Means Clustering":
+                    model = KMeans(n_clusters=3)
+                    model.fit(X_train)
+                    st.session_state.model = model
+                    st.success("K-Means clustering model trained.")
+                st.session_state.step = 5
 
     # Step 6: Evaluation
     st.header("Step 6: Evaluation")
     eval_btn = st.button("Evaluate Model")
     if eval_btn:
-        with st.spinner("Evaluating model..."):
-            model = st.session_state.model
-            X_test = st.session_state.X_test
-            y_test = st.session_state.y_test
-            if model_type == "Linear Regression":
-                preds = model.predict(X_test)
-                mse = mean_squared_error(y_test, preds)
-                st.metric("Mean Squared Error", f"{mse:.2f}")
-                fig = px.scatter(x=y_test, y=preds, labels={'x':'Actual','y':'Predicted'}, title="Actual vs Predicted")
-                st.plotly_chart(fig)
-                show_feature_importance(model, st.session_state.X_train)
-                st.session_state.results = pd.DataFrame({'Actual': y_test, 'Predicted': preds})
-            elif model_type == "Logistic Regression":
-                preds = model.predict(X_test)
-                acc = accuracy_score(y_test, preds)
-                st.metric("Accuracy", f"{acc*100:.2f}%")
-                st.text(classification_report(y_test, preds))
-                show_feature_importance(model, st.session_state.X_train)
-                st.session_state.results = pd.DataFrame({'Actual': y_test, 'Predicted': preds})
-            elif model_type == "K-Means Clustering":
-                X = st.session_state.X_train
-                labels = model.labels_
-                fig = px.scatter_matrix(X, color=labels, title="K-Means Clusters")
-                st.plotly_chart(fig)
-                st.session_state.results = pd.DataFrame(X)
-                st.session_state.results['Cluster'] = labels
-            st.success("Evaluation complete.")
-            st.session_state.step = 6
+        if st.session_state.model is None:
+            st.error("Please train a model before evaluation.")
+        elif st.session_state.X_test is None or st.session_state.y_test is None:
+            st.error("Please split the data before evaluation.")
+        else:
+            with st.spinner("Evaluating model..."):
+                model = st.session_state.model
+                X_test = st.session_state.X_test
+                y_test = st.session_state.y_test
+                if X_test.empty or y_test.empty:
+                    st.error("Test data is empty. Please check your data and split again.")
+                elif model_type == "Linear Regression":
+                    preds = model.predict(X_test)
+                    mse = mean_squared_error(y_test, preds)
+                    st.metric("Mean Squared Error", f"{mse:.2f}")
+                    fig = px.scatter(x=y_test, y=preds, labels={'x':'Actual','y':'Predicted'}, title="Actual vs Predicted")
+                    st.plotly_chart(fig)
+                    show_feature_importance(model, st.session_state.X_train)
+                    st.session_state.results = pd.DataFrame({'Actual': y_test, 'Predicted': preds})
+                elif model_type == "Logistic Regression":
+                    preds = model.predict(X_test)
+                    acc = accuracy_score(y_test, preds)
+                    st.metric("Accuracy", f"{acc*100:.2f}%")
+                    st.text(classification_report(y_test, preds))
+                    show_feature_importance(model, st.session_state.X_train)
+                    st.session_state.results = pd.DataFrame({'Actual': y_test, 'Predicted': preds})
+                elif model_type == "K-Means Clustering":
+                    X = st.session_state.X_train
+                    labels = model.labels_
+                    fig = px.scatter_matrix(X, color=labels, title="K-Means Clusters")
+                    st.plotly_chart(fig)
+                    st.session_state.results = pd.DataFrame(X)
+                    st.session_state.results['Cluster'] = labels
+                st.success("Evaluation complete.")
+                st.session_state.step = 6
 
     # Step 7: Results Visualization & Download
     st.header("Step 7: Results Visualization & Download")
