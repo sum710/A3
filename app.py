@@ -30,6 +30,7 @@ st.set_page_config(
 # Helper Functions
 # ----------------------
 GIFS = [
+    "https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif",
     "https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif",
     "https://media.giphy.com/media/26ufnwz3wDUli7GU0/giphy.gif",
     "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
@@ -54,7 +55,7 @@ def show_feature_importance(model, X):
 # ----------------------
 # Sidebar
 # ----------------------
-selected_gif = random.choice(GIFS)
+selected_gif = GIFS[0]
 st.sidebar.markdown("# 📊 Finance ML App")
 st.sidebar.markdown(get_gif_html(selected_gif, width="90%"), unsafe_allow_html=True)
 st.sidebar.markdown("---")
@@ -75,7 +76,9 @@ for i, step in enumerate(steps):
 # Help/Info Section
 with st.sidebar.expander("ℹ️ Help / Info"):
     st.markdown("""
-    - **Upload** a Kragle or Kaggle CSV dataset, or fetch data from Yahoo Finance.
+    - **To upload your data:** Click the 'Browse files' button under 'Upload Kragle/Kaggle Dataset (CSV)' in the sidebar, select your CSV file, then click 'Load Data' in the main area.
+    - **To fetch Yahoo Finance data:** Enter a ticker (e.g., AAPL), click 'Fetch Yahoo Finance Data', then click 'Load Data'.
+    - **To use example data:** Click 'Show Example Data' in the sidebar, then 'Load Data'.
     - **Navigate** each ML step using the buttons.
     - **Select** features and target for modeling.
     - **Download** results after evaluation.
@@ -85,7 +88,6 @@ with st.sidebar.expander("ℹ️ Help / Info"):
 # Data upload/fetch
 uploaded_file = st.sidebar.file_uploader("Upload Kragle/Kaggle Dataset (CSV)", type=["csv"])
 ticker = st.sidebar.text_input("Or enter a Yahoo Finance Ticker (e.g. AAPL)")
-fetch_btn = st.sidebar.button("Fetch Yahoo Finance Data")
 example_btn = st.sidebar.button("Show Example Data")
 
 st.sidebar.markdown("---")
@@ -132,14 +134,17 @@ if 'target' not in st.session_state:
 # Step 1: Load Data
 st.header("Step 1: Load Data")
 load_btn = st.button("Load Data")
-if load_btn or example_btn:
+if load_btn:
     with st.spinner("Loading data..."):
         if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
-            st.session_state.df = df
-            st.success("Dataset loaded successfully!")
-            st.session_state.step = 1
-        elif fetch_btn and ticker:
+            try:
+                df = pd.read_csv(uploaded_file)
+                st.session_state.df = df
+                st.success("Dataset loaded successfully from file!")
+                st.session_state.step = 1
+            except Exception as e:
+                st.error(f"Error loading file: {e}")
+        elif ticker:
             try:
                 df = yf.download(ticker, period="1y")
                 if not df.empty:
@@ -150,20 +155,25 @@ if load_btn or example_btn:
                     st.error("No data found for the given ticker.")
             except Exception as e:
                 st.error(f"Error fetching data: {e}")
-        elif example_btn:
-            df = pd.DataFrame({
-                'Open': np.random.rand(100)*100,
-                'High': np.random.rand(100)*100,
-                'Low': np.random.rand(100)*100,
-                'Close': np.random.rand(100)*100,
-                'Volume': np.random.randint(1000, 10000, 100)
-            })
-            st.session_state.df = df
-            st.info("Example data loaded.")
-            st.session_state.step = 1
         else:
-            st.warning("Please upload a dataset or enter a ticker and click fetch.")
+            st.warning("Please upload a dataset or enter a ticker.")
     if st.session_state.df is not None:
+        st.dataframe(st.session_state.df.head())
+        st.markdown(f"**Rows:** {st.session_state.df.shape[0]} | **Columns:** {st.session_state.df.shape[1]}")
+        st.plotly_chart(px.histogram(st.session_state.df, x=st.session_state.df.columns[0]))
+
+if example_btn:
+    with st.spinner("Loading example data..."):
+        df = pd.DataFrame({
+            'Open': np.random.rand(100)*100,
+            'High': np.random.rand(100)*100,
+            'Low': np.random.rand(100)*100,
+            'Close': np.random.rand(100)*100,
+            'Volume': np.random.randint(1000, 10000, 100)
+        })
+        st.session_state.df = df
+        st.info("Example data loaded.")
+        st.session_state.step = 1
         st.dataframe(st.session_state.df.head())
         st.markdown(f"**Rows:** {st.session_state.df.shape[0]} | **Columns:** {st.session_state.df.shape[1]}")
         st.plotly_chart(px.histogram(st.session_state.df, x=st.session_state.df.columns[0]))
@@ -194,8 +204,19 @@ if st.session_state.df is not None:
         if not numeric_cols:
             st.error("No numeric columns found for feature selection.")
         else:
-            features = st.multiselect("Select features for modeling", numeric_cols, default=numeric_cols[:-1])
-            target = st.selectbox("Select target variable", numeric_cols, index=len(numeric_cols)-1)
+            # Prefer 'Close' or 'C' as default target if present
+            default_target = None
+            note = ""
+            if 'Close' in numeric_cols:
+                default_target = 'Close'
+            elif 'C' in numeric_cols:
+                default_target = 'C'
+            if 'Close' in numeric_cols and 'C' in numeric_cols:
+                note = "Both 'Close' and 'C' columns found. Please select your preferred target."
+            features = st.multiselect("Select features for modeling", numeric_cols, default=[col for col in numeric_cols if col not in ['Close', 'C']])
+            target = st.selectbox("Select target variable", numeric_cols, index=numeric_cols.index(default_target) if default_target else len(numeric_cols)-1)
+            if note:
+                st.info(note)
             st.session_state.features = features
             st.session_state.target = target
             st.info(f"Selected features: {features}")
