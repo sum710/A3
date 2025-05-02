@@ -366,5 +366,5 @@ st.markdown("""
 ---
 **Course:** AF3005 – Programming for Finance  
 **Instructor:** Dr. Usama Arshad  
-**App by:** [Your Name]
+**App by:** Sumbal Murtaza
 """) 
