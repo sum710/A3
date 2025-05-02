@@ -193,7 +193,11 @@ if st.session_state.df is not None:
             st.success("Missing values removed. Data cleaned.")
             st.dataframe(df.head())
             st.session_state.step = 2
-            st.plotly_chart(px.imshow(df.corr(), text_auto=True, color_continuous_scale='blues', title="Correlation Heatmap"))
+            corr = df.corr(numeric_only=True)
+            if corr.shape[0] > 1 and not corr.isnull().all().all():
+                st.plotly_chart(px.imshow(corr, text_auto=True, color_continuous_scale='blues', title="Correlation Heatmap"))
+            else:
+                st.info("Not enough numeric data for correlation heatmap.")
 
     # Step 3: Feature Engineering
     st.header("Step 3: Feature Engineering")
