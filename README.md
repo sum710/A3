@@ -52,6 +52,20 @@ Each step is triggered with a button and includes interactive feedback via notif
 ## 💡 How to Run
 
 1. Clone this repo:
-   ```bash
+   ''bash
    git clone https://github.com/sum710/A3
    cd A3
+2. Install dependencies:
+ ''bash
+   pip install -r requirements.txt
+3. Run the Streamlit app:
+ ''bash
+   streamlit run app.py
+
+👤 Author
+Sumbal Murtaza – BSFT – FAST-NUCES Islamabad
+
+Email: sumbalmurtaza1@gmail.com
+📌 Tags
+#MachineLearning #FinanceTech #Streamlit #FASTNUCES #AF3005 #PythonForFinance #DataScience #Kragle
+
