@@ -39,9 +39,7 @@ st.markdown(
     h1, h2, h3, h4 {
         color: #f9d342; /* Gold color for headers */
     }
-    .stSidebar * {
-        color: #ffffff !important;
-    }
+    
     .stButton>button {
         background-color: #f9d342; /* Button color */
         color: #1e1e1e; /* Button text color */
@@ -53,16 +51,9 @@ st.markdown(
     .stButton>button:hover {
         background-color: #e0c32a; /* Lighter gold on hover */
     }
-    .stSidebar {
-        background-color: #2e2e2e; /* Darker sidebar background */
-        color: #ffffff; /* Sidebar text color */
-    }
-    .stSidebar .stText {
-        color: #ffffff; /* Ensure text in sidebar is white */
-    }
-    .stSidebar .stMarkdown {
-        color: #ffffff; /* Ensure markdown text in sidebar is white */
-    }
+    
+    
+    
     </style>
     """,
     unsafe_allow_html=True
