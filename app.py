@@ -25,52 +25,6 @@ st.set_page_config(
         'About': "# AF3005 – Programming for Finance | Assignment 3 | FAST-NUCES"
     }
 )
-# ----------------------
-# App Configuration
-# ----------------------
-st.set_page_config(
-    page_title="Finance ML App",
-    page_icon="💹",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'About': "# AF3005 – Programming for Finance | Assignment 3 | FAST-NUCES"
-    }
-)
-
-# ----------------------
-# Custom CSS for Theme
-# ----------------------
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #1e1e1e; /* Dark background for better contrast */
-        color: #ffffff; /* White text for readability */
-        font-family: 'Arial', sans-serif; /* Clean font */
-    }
-    h1, h2, h3, h4 {
-        color: #f9d342; /* Gold color for headers */
-    }
-    .stButton>button {
-        background-color: #f9d342; /* Button color */
-        color: #1e1e1e; /* Button text color */
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-size: 16px;
-    }
-    .stButton>button:hover {
-        background-color: #e0c32a; /* Lighter gold on hover */
-    }
-    .stSidebar {
-        background-color: #2e2e2e; /* Sidebar background */
-        color: #ffffff; /* Sidebar text color */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # ----------------------
 # Helper Functions
