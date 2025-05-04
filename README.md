@@ -53,5 +53,5 @@ Each step is triggered with a button and includes interactive feedback via notif
 
 1. Clone this repo:
    ```bash
-   git clone https://
+   git clone https://github.com/sum710/A3
    cd A3
