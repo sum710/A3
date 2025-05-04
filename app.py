@@ -25,7 +25,16 @@ st.set_page_config(
         'About': "# AF3005 – Programming for Finance | Assignment 3 | FAST-NUCES"
     }
 )
-    font-family: 'Arial', sans-serif; /* Clean font */
+  # ----------------------
+# Custom CSS for Theme
+# ----------------------
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #1e1e1e; /* Dark background for better contrast */
+        color: #ffffff; /* White text for readability */  
+        font-family: 'Arial', sans-serif; /* Clean font */
     }
     h1, h2, h3, h4 {
         color: #f9d342; /* Gold color for headers */
@@ -48,8 +57,7 @@ st.set_page_config(
     </style>
     """,
     unsafe_allow_html=True
-)
-
+)    
 # ----------------------
 # Helper Functions
 # ----------------------
