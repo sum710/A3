@@ -87,7 +87,7 @@ def show_feature_importance(model, X):
 # ----------------------
 # Sidebar
 # ----------------------
-selected_gif = GIFS[0]
+selected_gif = GIFS[4]
 st.sidebar.markdown("# 📊 Finance ML App")
 st.sidebar.markdown(get_gif_html(selected_gif, width="90%"), unsafe_allow_html=True)
 st.sidebar.markdown("---")
@@ -137,7 +137,7 @@ st.markdown(
             This interactive app lets you explore financial data, apply machine learning models, and visualize results step by step.<br>
             <b>Upload your dataset or fetch real-time data, then walk through the ML pipeline interactively!</b>
         </p>
-        <img src='{selected_gif}' width='300'>
+        <img src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXR3Z2V5NjBmb3h5NHBvaDY4M3MyaDlpcTQ4MTd1dTJoMWw1MnhpaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oKIPEqDGUULpEU0aQ/giphy.gif' width='300'>
     </div>
     """,
     unsafe_allow_html=True
