@@ -52,7 +52,7 @@ st.markdown(
     }
     .stSidebar {
         background-color: #2e2e2e; /* Sidebar background */
-        color: #ffffff; /* Sidebar text color */
+        color:#1e1e1e; /* Sidebar text color */
     }
     </style>
     """,
