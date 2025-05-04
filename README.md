@@ -4,8 +4,6 @@
 ### 👨‍🏫 Instructor: Dr. Usama Arshad (Assistant Professor, FSM)  
 ### 🎓 Program: BS Financial Technology (BSFT), Spring 2025  
 ### 📍 FAST National University of Computer and Emerging Sciences (FAST-NUCES), Islamabad  
-### 📌 Sections: BSFT06A, BSFT06B, BSFT06C  
-
 ---
 
 ## 🚀 App Overview
@@ -55,10 +53,12 @@ Each step is triggered with a button and includes interactive feedback via notif
    ''bash
    git clone https://github.com/sum710/A3
    cd A3
-2. Install dependencies:
+   
+3. Install dependencies:
  ''bash
    pip install -r requirements.txt
-3. Run the Streamlit app:
+   
+5. Run the Streamlit app:
  ''bash
    streamlit run app.py
 
@@ -66,6 +66,7 @@ Each step is triggered with a button and includes interactive feedback via notif
 Sumbal Murtaza – BSFT – FAST-NUCES Islamabad
 
 Email: sumbalmurtaza1@gmail.com
+
 📌 Tags
 #MachineLearning #FinanceTech #Streamlit #FASTNUCES #AF3005 #PythonForFinance #DataScience #Kragle
 
