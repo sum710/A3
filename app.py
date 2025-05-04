@@ -88,7 +88,7 @@ with st.sidebar.expander("ℹ️ Help / Info"):
 # Data upload/fetch
 uploaded_file = st.sidebar.file_uploader("Upload Kragle/Kaggle Dataset (CSV)", type=["csv"])
 ticker = st.sidebar.text_input("Or enter a Yahoo Finance Ticker (e.g. AAPL)")
-example_btn = st.sidebar.button("Show Example Data")
+example_btn = st.sidebar.button("Fetch Data")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Developed for AF3005 – Programming for Finance**")
