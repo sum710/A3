@@ -51,8 +51,14 @@ st.markdown(
         background-color: #e0c32a; /* Lighter gold on hover */
     }
     .stSidebar {
-        background-color: #2e2e2e; /* Sidebar background */
-        color:#1e1e1e; /* Sidebar text color */
+        background-color: #2e2e2e; /* Darker sidebar background */
+        color: #ffffff; /* Sidebar text color */
+    }
+    .stSidebar .stText {
+        color: #ffffff; /* Ensure text in sidebar is white */
+    }
+    .stSidebar .stMarkdown {
+        color: #ffffff; /* Ensure markdown text in sidebar is white */
     }
     </style>
     """,
