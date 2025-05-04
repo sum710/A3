@@ -50,16 +50,17 @@ Each step is triggered with a button and includes interactive feedback via notif
 ## 💡 How to Run
 
 1. Clone this repo:
-   ''bash
+   
    git clone https://github.com/sum710/A3
+   
    cd A3
    
 3. Install dependencies:
- ''bash
+
    pip install -r requirements.txt
    
 5. Run the Streamlit app:
- ''bash
+   
    streamlit run app.py
 
 👤 Author
